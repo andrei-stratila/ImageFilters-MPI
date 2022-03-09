@@ -1,0 +1,106 @@
+Nume: Stratila Andrei
+Grupa: 335CC
+
+############################  Tema 3 APD   #####################################
+
+Descrierea algoritmului: Se citeste fisierul corespunzator imaginii, se calculeaza
+partea din imagine ce va fi prelucrata de catre fiecare proces (liniile din matricea
+imaginii corespunzatoare intervalului [start, end]). Se face broadcast matricii
+inainte de aplicarea filtrului. Se aplica filtrul asupra portiunii specifice 
+procesului. Toate liniile modificate ajung inapoi in procesul cu rank 0 prin
+Send si Recv, unde apoi sunt unite in matricea imagine. Procesul se repeta pana 
+cand sunt aplicate toate filtrele. Apoi procesul 0 scrie in fisier imaginea nou
+obtinuta.
+
+Scalabilitatea temei a fost testata pe clusterul facultatii, pe fep.grid.pub.ro.
+Masina utilizata are ca specificatii: 2 x 12-core Intel Xeon X5650. (Logarea a fost 
+facuta pe hp-sl.q, comanda data "qlogin -q hp-sl.q").
+
+Se poate observa ca o data cu cresterea numarului de procese, timpul de executie
+scade. La inceput, este o scadere destul de semnificativa (de la un proces la doua
+procese se poate vedea o scadere intre 30-50%), iar apoi exista o tendinta de 
+liniarizare a timpului de executie. Cu cat imaginile sunt mai mari cu atat se poate
+observa imbunatirea adusa timpului de executie. Aceasta imbunatirea a timpului 
+este data de calculul in paralel al imaginii, fiecare proces calculeaza independent
+de altul o portiune disjuncta din imagine.
+
+
+Testing filters on file: Colectie Poze/PGM/landscape.pgm with 1 RUN
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth           .210    .190    .177    .186    .185    .187    .180    .223
+filter: blur             .204    .204    .189    .179    .182    .184    .188    .194
+filter: sharpen          .191    .181    .180    .183    .184    .197    .187    .193
+filter: mean             .205    .167    .171    .181    .189    .187    .193    .207
+filter: emboss           .205    .174    .180    .177    .202    .195    .186    .190
+filters: bssembssem      .470    .340    .318    .301    .280    .304    .288    .290
+
+
+Testing filters on file: Colectie Poze/PNM/landscape.pnm with 1 RUN
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth          3.219   2.436   2.279   2.150   2.097   2.004   2.200   1.960
+filter: blur            2.883   2.483   2.271   2.400   2.223   2.164   2.193   2.182
+filter: sharpen         3.307   2.507   2.277   2.202   2.086   2.230   2.003   1.979
+filter: mean            3.247   2.484   2.320   2.135   2.075   2.064   1.986   1.927
+filter: emboss          3.383   2.549   2.307   2.163   2.360   2.031   1.991   1.970
+filters: bssembssem    17.159  10.196   7.816   6.680   6.034   5.698   5.557   5.219
+
+
+Testing filters on file: Colectie Poze/PGM/landscape.pgm with 4 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth           .855    .718    .731    .730    .732    .776    .785    .807
+filter: blur             .770    .718    .696    .709    .899    .755    .777    .775
+filter: sharpen          .745    .679    .746    .727    .726    .749    .758    .813
+filter: mean             .757    .733    .718    .700    .760    .749    .746    .769
+filter: emboss           .776    .728    .702    .722    .731    .788    .786    .766
+filters: bssembssem     1.896   1.388   1.245   1.161   1.141   1.121   1.125   1.137
+
+
+Testing filters on file: Colectie Poze/PNM/landscape.pnm with 4 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth         12.922  10.130   8.948   8.490   8.350   8.450   8.021   8.032
+filter: blur           12.501   9.922   9.113   9.248   8.502   8.202   7.894   8.021
+filter: sharpen        13.146   9.885   9.088   8.464   8.113   8.193   9.329   8.017
+filter: mean           12.961   9.871   9.163   8.477   8.101   7.962   8.289   8.300
+filter: emboss         13.090  10.069   9.043   8.798   8.172   8.198   8.387   8.346
+filters: bssembssem    68.868  40.476  31.144  26.295  24.232  22.399  21.781  21.132
+
+
+Testing filters on file: Colectie Poze/PGM/macro.pgm with 10 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth          3.202   2.633   2.614   2.546   2.568   2.499   2.545   2.632
+filter: blur            2.911   2.630   2.547   2.424   2.485   2.585   2.590   2.573
+filter: sharpen         2.902   2.602   2.557   2.548   2.576   2.588   2.602   2.602
+filter: mean            2.972   2.621   2.621   2.486   2.480   2.523   2.653   2.577
+filter: emboss          2.941   2.643   2.644   2.497   2.548   2.659   2.600   2.624
+filters: bssembssem    10.305   6.299   5.811   5.562   5.499   5.030   4.754   4.936
+
+
+Testing filters on file: Colectie Poze/PNM/macro.pnm with 10 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth          5.440   4.432   4.179   3.999   3.881   3.855   3.844   3.915
+filter: blur            5.405   4.378   4.187   4.001   3.842   3.851   3.925   3.831
+filter: sharpen         5.433   4.491   4.145   3.974   3.943   3.824   3.812   3.912
+filter: mean            5.457   4.356   4.088   4.003   3.885   3.851   3.789   3.848
+filter: emboss          5.441   4.469   4.278   3.935   3.842   3.904   3.863   3.851
+filters: bssembssem    20.590  13.102  10.500   8.639   7.792   7.234   7.127   6.939
+
+
+Testing filters on file: Colectie Poze/PNM/scroll-of-truth.pnm with 10 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth          2.734   2.331   2.271   2.187   2.175   2.196   2.275   2.249
+filter: blur            2.553   2.211   2.164   2.180   2.174   2.178   2.199   2.241
+filter: sharpen         2.495   2.241   2.168   2.185   2.139   2.225   2.206   2.254
+filter: mean            2.492   2.254   2.158   2.174   2.171   2.174   2.247   2.190
+filter: emboss          2.577   2.308   2.277   2.173   2.161   2.191   2.206   2.197
+filters: bssembssem     8.264   5.297   4.366   4.018   3.714   3.565   3.430   3.330
+
+
+Testing filters on file: Colectie Poze/PGM/darth-vader.pgm with 10 RUNS
+Running for NP =            1       2       3       4       5       6       7       8
+filter: smooth          4.386   3.549   3.479   3.381   3.370   3.362   3.386   3.378
+filter: blur            4.236   3.627   3.540   3.345   3.413   3.348   3.337   3.474
+filter: sharpen         4.270   3.604   3.551   3.393   3.361   3.379   3.385   3.427
+filter: mean            4.224   3.681   3.540   3.388   3.321   3.390   3.430   3.396
+filter: emboss          4.264   3.602   3.542   3.374   3.382   3.391   3.379   3.366
+filters: bssembssem    15.169  10.151   8.472   7.900   7.510   7.389   7.807   7.848
+
